@@ -9,11 +9,6 @@
  */
 #if defined(JEMALLOC_DEBUG) || defined(JEMALLOC_CODE_COVERAGE)
    /* Disable inlining to make debugging/profiling easier. */
-#  define JEMALLOC_ALWAYS_INLINE
-#  define JEMALLOC_ALWAYS_INLINE_C static
-#  define JEMALLOC_INLINE
-#  define JEMALLOC_INLINE_C static
-#  define inline
 #else
 #  define JEMALLOC_ENABLE_INLINE
 #  ifdef JEMALLOC_HAVE_ATTR
@@ -35,7 +30,7 @@
 #ifdef JEMALLOC_CC_SILENCE
 #  define UNUSED JEMALLOC_ATTR(unused)
 #else
-#  define UNUSED
+
 #endif
 
 #define	ZU(z)	((size_t)z)

@@ -10,11 +10,7 @@
 
 #define	JEMALLOC_NO_DEMANGLE
 #ifdef JEMALLOC_JET
-#  define JEMALLOC_N(n) jet_##n
-#  include "jemalloc/internal/public_namespace.h"
-#  define JEMALLOC_NO_RENAME
-#  include "../jemalloc.h"
-#  undef JEMALLOC_NO_RENAME
+
 #else
 #  define JEMALLOC_N(n) je_##n
 #  include "../jemalloc.h"

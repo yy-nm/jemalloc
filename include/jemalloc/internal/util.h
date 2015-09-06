@@ -54,7 +54,7 @@
 #ifdef JEMALLOC_CC_SILENCE
 #	define JEMALLOC_CC_SILENCE_INIT(v) = v
 #else
-#	define JEMALLOC_CC_SILENCE_INIT(v)
+
 #endif
 
 #define	JEMALLOC_GNUC_PREREQ(major, minor)				\
@@ -76,9 +76,7 @@
 #	define unreachable()
 #  endif
 #else
-#	define likely(x)   !!(x)
-#	define unlikely(x) !!(x)
-#	define unreachable()
+
 #endif
 
 /*

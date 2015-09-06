@@ -7,32 +7,16 @@
 /* Runtime configuration options. */
 const char	*je_malloc_conf JEMALLOC_ATTR(weak);
 bool	opt_abort =
-#ifdef JEMALLOC_DEBUG
-    true
-#else
     false
-#endif
     ;
 const char	*opt_junk =
-#if (defined(JEMALLOC_DEBUG) && defined(JEMALLOC_FILL))
-    "true"
-#else
     "false"
-#endif
     ;
 bool	opt_junk_alloc =
-#if (defined(JEMALLOC_DEBUG) && defined(JEMALLOC_FILL))
-    true
-#else
     false
-#endif
     ;
 bool	opt_junk_free =
-#if (defined(JEMALLOC_DEBUG) && defined(JEMALLOC_FILL))
-    true
-#else
     false
-#endif
     ;
 
 size_t	opt_quarantine = ZU(0);
@@ -167,16 +151,13 @@ const uint8_t	size2index_tab[] = {
 #  define IS_INITIALIZER	(malloc_initializer == pthread_self())
 static pthread_t		malloc_initializer = NO_INITIALIZER;
 #else
-#  define NO_INITIALIZER	false
-#  define INITIALIZER		true
-#  define IS_INITIALIZER	malloc_initializer
-static bool			malloc_initializer = NO_INITIALIZER;
+
 #endif
 
 /* Used to avoid initialization races. */
 #ifdef _WIN32
 #if _WIN32_WINNT >= 0x0600
-static malloc_mutex_t	init_lock = SRWLOCK_INIT;
+
 #else
 static malloc_mutex_t	init_lock;
 static bool init_lock_initialized = false;
@@ -200,9 +181,7 @@ _init_init_lock(void)
 }
 
 #ifdef _MSC_VER
-#  pragma section(".CRT$XCU", read)
-JEMALLOC_SECTION(".CRT$XCU") JEMALLOC_ATTR(used)
-static const void (WINAPI *init_init_lock)(void) = _init_init_lock;
+
 #endif
 #endif
 #else
