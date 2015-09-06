@@ -156,34 +156,7 @@ static pthread_t		malloc_initializer = NO_INITIALIZER;
 
 /* Used to avoid initialization races. */
 #ifdef _WIN32
-#if _WIN32_WINNT >= 0x0600
 
-#else
-static malloc_mutex_t	init_lock;
-static bool init_lock_initialized = false;
-
-JEMALLOC_ATTR(constructor)
-static void WINAPI
-_init_init_lock(void)
-{
-
-	/* If another constructor in the same binary is using mallctl to
-	 * e.g. setup chunk hooks, it may end up running before this one,
-	 * and malloc_init_hard will crash trying to lock the uninitialized
-	 * lock. So we force an initialization of the lock in
-	 * malloc_init_hard as well. We don't try to care about atomicity
-	 * of the accessed to the init_lock_initialized boolean, since it
-	 * really only matters early in the process creation, before any
-	 * separate thread normally starts doing anything. */
-	if (!init_lock_initialized)
-		malloc_mutex_init(&init_lock);
-	init_lock_initialized = true;
-}
-
-#ifdef _MSC_VER
-
-#endif
-#endif
 #else
 static malloc_mutex_t	init_lock = MALLOC_MUTEX_INITIALIZER;
 #endif
@@ -732,6 +705,8 @@ malloc_ncpus(void)
 	return ((result == -1) ? 1 : (unsigned)result);
 }
 
+// 每次获取一对键值对, 并把进度保存在 opts, k, klen, v, vlen 值中
+// 返回 false 代表没有即解析完
 static bool
 malloc_conf_next(char const **opts_p, char const **k_p, size_t *klen_p,
     char const **v_p, size_t *vlen_p)
@@ -829,6 +804,7 @@ malloc_conf_init(void)
 	 * Automatically configure valgrind before processing options.  The
 	 * valgrind option remains in jemalloc 3.x for compatibility reasons.
 	 */
+	 // config_valgrind = false
 	if (config_valgrind) {
 		in_valgrind = (RUNNING_ON_VALGRIND != 0) ? true : false;
 		if (config_fill && unlikely(in_valgrind)) {
@@ -843,10 +819,13 @@ malloc_conf_init(void)
 			opt_tcache = false;
 	}
 
+    // default opt is given by author in github is
+    // export MALLOC_CONF="prof:true,lg_prof_sample:1,prof_accum:false,prof_prefix:jeprof.out"
 	for (i = 0; i < 3; i++) {
 		/* Get runtime configuration. */
 		switch (i) {
 		case 0:
+            // je_malloc_conf is NULL
 			if (je_malloc_conf != NULL) {
 				/*
 				 * Use options that were compiled into the
@@ -859,6 +838,7 @@ malloc_conf_init(void)
 				opts = buf;
 			}
 			break;
+            // conf file is not exists
 		case 1: {
 			int linklen = 0;
 #ifndef _WIN32
@@ -886,10 +866,12 @@ malloc_conf_init(void)
 			buf[linklen] = '\0';
 			opts = buf;
 			break;
-		} case 2: {
+		}
+        // work fine
+        case 2: {
 			const char *envname =
 #ifdef JEMALLOC_PREFIX
-			    JEMALLOC_CPREFIX"MALLOC_CONF"
+//			    JEMALLOC_CPREFIX"MALLOC_CONF"
 #else
 			    "MALLOC_CONF"
 #endif
@@ -913,6 +895,7 @@ malloc_conf_init(void)
 			opts = buf;
 		}
 
+ // export MALLOC_CONF="prof:true,lg_prof_sample:1,prof_accum:false,prof_prefix:jeprof.out"
 		while (*opts != '\0' && !malloc_conf_next(&opts, &k, &klen, &v,
 		    &vlen)) {
 #define	CONF_MATCH(n)							\
@@ -1159,6 +1142,7 @@ malloc_init_hard_a0_locked(void)
 
 	malloc_initializer = INITIALIZER;
 
+    // config_prof = false;
 	if (config_prof)
 		prof_boot0();
 	malloc_conf_init();
@@ -1290,10 +1274,8 @@ static bool
 malloc_init_hard(void)
 {
 
-#if defined(_WIN32) && _WIN32_WINNT < 0x0600
-	_init_init_lock();
-#endif
 	malloc_mutex_lock(&init_lock);
+    // first time return false
 	if (!malloc_init_hard_needed()) {
 		malloc_mutex_unlock(&init_lock);
 		return (false);
