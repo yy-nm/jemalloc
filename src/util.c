@@ -96,6 +96,8 @@ buferror(int err, char *buf, size_t buflen)
 #endif
 }
 
+// base == 0 for detect by self, start with 0, base = 8, start with 0x, base = 16
+// otherwise base = 10
 uintmax_t
 malloc_strtoumax(const char *restrict nptr, char **restrict endptr, int base)
 {
@@ -105,6 +107,7 @@ malloc_strtoumax(const char *restrict nptr, char **restrict endptr, int base)
 	const char *p, *ns;
 
 	p = nptr;
+    // error base
 	if (base < 0 || base == 1 || base > 36) {
 		ns = p;
 		set_errno(EINVAL);
@@ -117,6 +120,7 @@ malloc_strtoumax(const char *restrict nptr, char **restrict endptr, int base)
 	neg = false;
 	while (true) {
 		switch (*p) {
+            // whitespace symbol
 		case '\t': case '\n': case '\v': case '\f': case '\r': case ' ':
 			p++;
 			break;
