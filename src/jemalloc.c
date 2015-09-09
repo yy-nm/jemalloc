@@ -947,6 +947,7 @@ malloc_conf_init(void)
 				}					\
 				continue;				\
 			}
+            // ssize_t -> signed int
 #define	CONF_HANDLE_SSIZE_T(o, n, min, max)				\
 			if (CONF_MATCH(n)) {				\
 				long l;					\
@@ -978,6 +979,8 @@ malloc_conf_init(void)
 				continue;				\
 			}
 
+// export MALLOC_CONF="prof:true,lg_prof_sample:1,prof_accum:false,prof_prefix:jeprof.out"
+            // opt_abort = false;
 			CONF_HANDLE_BOOL(opt_abort, "abort", true)
 			/*
 			 * Chunks always require at least one header page,
@@ -987,9 +990,11 @@ malloc_conf_init(void)
 			 * use a conservative bound that accommodates all these
 			 * constraints.
 			 */
+			 // opt_lg_chunk = 12 + 2 + 2
 			CONF_HANDLE_SIZE_T(opt_lg_chunk, "lg_chunk", LG_PAGE +
 			    LG_SIZE_CLASS_GROUP + (config_fill ? 2 : 1),
 			    (sizeof(size_t) << 3) - 1, true)
+			// not match, opt_dss = "secondary"
 			if (strncmp("dss", k, klen) == 0) {
 				int i;
 				bool match = false;
@@ -1014,10 +1019,13 @@ malloc_conf_init(void)
 				}
 				continue;
 			}
+            // opt_narenas = 0, not changed
 			CONF_HANDLE_SIZE_T(opt_narenas, "narenas", 1,
 			    SIZE_T_MAX, false)
+			    // opt_lg_dirty_mult = LG_DIRTY_MULT_DEFAULT = 3
 			CONF_HANDLE_SSIZE_T(opt_lg_dirty_mult, "lg_dirty_mult",
 			    -1, (sizeof(size_t) << 3) - 1)
+			    // opt_stats_print = false
 			CONF_HANDLE_BOOL(opt_stats_print, "stats_print", true)
 			if (config_fill) {
 				if (CONF_MATCH("junk")) {
