@@ -62,6 +62,11 @@ const size_t	index2size_tab[NSIZES] = {
 #undef SC
 };
 
+//LG_TINY_MIN = 3
+//length: 1 * 2 + 2 * 7 + 2^2 * 4 + ... 2^6 * 4
+//length: 2 * 8 + 4 * (2^2 + .. 2^6) = 4 * 2^7 = 2^9
+// value = 2(0, 1) 2^0, 7(2~8) 2^1, 4(9~12) 2^2, 4(13~16) 2^3, 4(17~20) 2^4, 4(21~24) 2^5
+//, 4(25~28) 2^6
 JEMALLOC_ALIGNED(CACHELINE)
 const uint8_t	size2index_tab[] = {
 #if LG_TINY_MIN == 0
@@ -1369,6 +1374,8 @@ imalloc_body(size_t size, tsd_t **tsd, size_t *usize)
 		return (NULL);
 	*tsd = tsd_fetch();
 
+    // config_prof = false
+    // opt_prof = false
 	if (config_prof && opt_prof) {
 		*usize = s2u(size);
 		if (unlikely(*usize == 0))

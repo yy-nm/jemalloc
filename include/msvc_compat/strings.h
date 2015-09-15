@@ -4,24 +4,9 @@
 /* MSVC doesn't define ffs/ffsl. This dummy strings.h header is provided
  * for both */
 #ifdef _MSC_VER
-#  include <intrin.h>
-#  pragma intrinsic(_BitScanForward)
-static __forceinline int ffsl(long x)
-{
-	unsigned long i;
-
-	if (_BitScanForward(&i, x))
-		return (i + 1);
-	return (0);
-}
-
-static __forceinline int ffs(int x)
-{
-
-	return (ffsl(x));
-}
 
 #else
+// 返回第一个不是 0 的 bit, 位置从低位开始, 从 1 开始
 #  define ffsl(x) __builtin_ffsl(x)
 #  define ffs(x) __builtin_ffs(x)
 #endif

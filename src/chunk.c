@@ -701,27 +701,10 @@ bool
 chunk_boot(void)
 {
 #ifdef _WIN32
-	SYSTEM_INFO info;
-	GetSystemInfo(&info);
 
-	/*
-	 * Verify actual page size is equal to or an integral multiple of
-	 * configured page size.
-	 */
-	if (info.dwPageSize & ((1U << LG_PAGE) - 1))
-		return (true);
-
-	/*
-	 * Configure chunksize (if not set) to match granularity (usually 64K),
-	 * so pages_map will always take fast path.
-	 */
-	if (!opt_lg_chunk) {
-		opt_lg_chunk = jemalloc_ffs((int)info.dwAllocationGranularity)
-		    - 1;
-	}
 #else
 	if (!opt_lg_chunk)
-		opt_lg_chunk = LG_CHUNK_DEFAULT;
+		opt_lg_chunk = LG_CHUNK_DEFAULT; //21
 #endif
 
 	/* Set variables according to the value of opt_lg_chunk. */

@@ -663,6 +663,7 @@ s2u(size_t size)
 {
 
 	assert(size > 0);
+    // LOOKUP_MAXCLASS = 1 << 12
 	if (likely(size <= LOOKUP_MAXCLASS))
 		return (s2u_lookup(size));
 	return (s2u_compute(size));

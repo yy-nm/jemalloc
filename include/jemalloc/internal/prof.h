@@ -9,7 +9,7 @@ typedef struct prof_tdata_s prof_tdata_t;
 
 /* Option defaults. */
 #ifdef JEMALLOC_PROF
-#  define PROF_PREFIX_DEFAULT		"jeprof"
+
 #else
 #  define PROF_PREFIX_DEFAULT		""
 #endif

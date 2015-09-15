@@ -280,10 +280,9 @@ MALLOC_TSD
 malloc_tsd_externs(, tsd_t)
 malloc_tsd_funcs(JEMALLOC_ALWAYS_INLINE, , tsd_t, tsd_initializer, tsd_cleanup)
 
-JEMALLOC_ALWAYS_INLINE tsd_t *
-tsd_fetch(void)
+JEMALLOC_ALWAYS_INLINE tsd_t * tsd_fetch(void)
 {
-	tsd_t *tsd = tsd_get();
+	tsd_t *tsd = tsd_get(); // get tsd_tls = TSD_INITIALIZER
 
 	if (unlikely(tsd->state != tsd_state_nominal)) {
 		if (tsd->state == tsd_state_uninitialized) {
