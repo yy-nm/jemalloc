@@ -198,9 +198,11 @@ arena_avail_comp(arena_chunk_map_misc_t *a, arena_chunk_map_misc_t *b)
 	return (ret);
 }
 
+
 /* Generate red-black tree functions. */
 rb_gen(static UNUSED, arena_avail_tree_, arena_avail_tree_t,
     arena_chunk_map_misc_t, rb_link, arena_avail_comp)
+
 
 static void
 arena_avail_insert(arena_t *arena, arena_chunk_t *chunk, size_t pageind,
@@ -3243,7 +3245,7 @@ bool
 arena_boot(void)
 {
 	unsigned i;
-
+    //default opt_lg_dirty_mult = 3
 	arena_lg_dirty_mult_default_set(opt_lg_dirty_mult);
 
 	/*

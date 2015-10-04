@@ -173,17 +173,7 @@ typedef struct {
 } malloc_utrace_t;
 
 #ifdef JEMALLOC_UTRACE
-#  define UTRACE(a, b, c) do {						\
-	if (unlikely(opt_utrace)) {					\
-		int utrace_serrno = errno;				\
-		malloc_utrace_t ut;					\
-		ut.p = (a);						\
-		ut.s = (b);						\
-		ut.r = (c);						\
-		utrace(&ut, sizeof(ut));				\
-		errno = utrace_serrno;					\
-	}								\
-} while (0)
+
 #else
 #  define UTRACE(a, b, c)
 #endif
@@ -701,9 +691,7 @@ malloc_ncpus(void)
 	long result;
 
 #ifdef _WIN32
-	SYSTEM_INFO si;
-	GetSystemInfo(&si);
-	result = si.dwNumberOfProcessors;
+
 #else
 	result = sysconf(_SC_NPROCESSORS_ONLN);
 #endif

@@ -108,6 +108,8 @@ malloc_tsd_boot0(void)
 {
 
 	ncleanups = 0;
+    // gen by macro malloc_tsd_funcs tsd.h L.131
+    // if no error always return false
 	if (tsd_boot0())
 		return (true);
 	*tsd_arenas_cache_bypassp_get(tsd_fetch()) = true;

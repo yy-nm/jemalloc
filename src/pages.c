@@ -11,12 +11,7 @@ pages_map(void *addr, size_t size)
 	assert(size != 0);
 
 #ifdef _WIN32
-	/*
-	 * If VirtualAlloc can't allocate at the given address when one is
-	 * given, it fails and returns NULL.
-	 */
-	ret = VirtualAlloc(addr, size, MEM_COMMIT | MEM_RESERVE,
-	    PAGE_READWRITE);
+
 #else
 	/*
 	 * We don't use MAP_FIXED here, because it can cause the *replacement*
@@ -46,7 +41,7 @@ pages_unmap(void *addr, size_t size)
 {
 
 #ifdef _WIN32
-	if (VirtualFree(addr, 0, MEM_RELEASE) == 0)
+
 #else
 	if (munmap(addr, size) == -1)
 #endif
@@ -56,7 +51,7 @@ pages_unmap(void *addr, size_t size)
 		buferror(get_errno(), buf, sizeof(buf));
 		malloc_printf("<jemalloc>: Error in "
 #ifdef _WIN32
-		              "VirtualFree"
+
 #else
 		              "munmap"
 #endif
@@ -73,17 +68,7 @@ pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size)
 
 	assert(alloc_size >= leadsize + size);
 #ifdef _WIN32
-	{
-		void *new_addr;
 
-		pages_unmap(addr, alloc_size);
-		new_addr = pages_map(ret, size);
-		if (new_addr == ret)
-			return (ret);
-		if (new_addr)
-			pages_unmap(new_addr, size);
-		return (NULL);
-	}
 #else
 	{
 		size_t trailsize = alloc_size - leadsize - size;
@@ -148,15 +133,13 @@ pages_purge(void *addr, size_t size)
 	bool unzeroed;
 
 #ifdef _WIN32
-	VirtualAlloc(addr, size, MEM_RESET, PAGE_READWRITE);
-	unzeroed = true;
+
 #elif defined(JEMALLOC_HAVE_MADVISE)
 #  ifdef JEMALLOC_PURGE_MADVISE_DONTNEED
 #    define JEMALLOC_MADV_PURGE MADV_DONTNEED
 #    define JEMALLOC_MADV_ZEROS true
 #  elif defined(JEMALLOC_PURGE_MADVISE_FREE)
-#    define JEMALLOC_MADV_PURGE MADV_FREE
-#    define JEMALLOC_MADV_ZEROS false
+
 #  else
 #    error "No madvise(2) flag defined for purging unused dirty pages."
 #  endif

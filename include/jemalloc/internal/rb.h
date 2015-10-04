@@ -30,12 +30,7 @@ struct {								\
     a_type *rbn_right_red;						\
 }
 #else
-#define	rb_node(a_type)							\
-struct {								\
-    a_type *rbn_left;							\
-    a_type *rbn_right;							\
-    bool rbn_red;							\
-}
+
 #endif
 
 /* Root structure. */
@@ -80,25 +75,7 @@ struct {								\
       (a_node)->a_field.rbn_right_red) & ((ssize_t)-2));		\
 } while (0)
 #else
-/* Right accessors. */
-#define	rbtn_right_get(a_type, a_field, a_node)				\
-    ((a_node)->a_field.rbn_right)
-#define	rbtn_right_set(a_type, a_field, a_node, a_right) do {		\
-    (a_node)->a_field.rbn_right = a_right;				\
-} while (0)
 
-/* Color accessors. */
-#define	rbtn_red_get(a_type, a_field, a_node)				\
-    ((a_node)->a_field.rbn_red)
-#define	rbtn_color_set(a_type, a_field, a_node, a_red) do {		\
-    (a_node)->a_field.rbn_red = (a_red);				\
-} while (0)
-#define	rbtn_red_set(a_type, a_field, a_node) do {			\
-    (a_node)->a_field.rbn_red = true;					\
-} while (0)
-#define	rbtn_black_set(a_type, a_field, a_node) do {			\
-    (a_node)->a_field.rbn_red = false;					\
-} while (0)
 #endif
 
 /* Node initializer. */

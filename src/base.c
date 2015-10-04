@@ -146,6 +146,7 @@ base_boot(void)
 
 	if (malloc_mutex_init(&base_mtx))
 		return (true);
+    // gen by macros in extent.c L.40
 	extent_tree_szad_new(&base_avail_szad);
 	base_nodes = NULL;
 

@@ -146,7 +146,6 @@ struct arena_chunk_map_misc_s {
 	 * 2) arena_run_t conceptually uses this linkage for in-use non-full
 	 *    runs, rather than directly embedding linkage.
 	 */
-	rb_node(arena_chunk_map_misc_t)		rb_link;
 
 	union {
 		/* Linkage for list of dirty runs. */
@@ -161,6 +160,7 @@ struct arena_chunk_map_misc_s {
 		/* Small region run metadata. */
 		arena_run_t			run;
 	};
+    rb_node(arena_chunk_map_misc_t)		rb_link;
 };
 typedef rb_tree(arena_chunk_map_misc_t) arena_avail_tree_t;
 typedef rb_tree(arena_chunk_map_misc_t) arena_run_tree_t;
