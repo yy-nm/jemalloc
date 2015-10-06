@@ -1146,7 +1146,8 @@ malloc_init_hard_a0_locked(void)
     // config_prof = false;
 	if (config_prof)
 		prof_boot0();
-	malloc_conf_init();
+	malloc_conf_init(); // 基本上没有用
+	// opt_stats_print = false;
 	if (opt_stats_print) {
 		/* Print statistics at exit. */
 		if (atexit(stats_print_atexit) != 0) {
@@ -1276,7 +1277,7 @@ malloc_init_hard(void)
 {
 
 	malloc_mutex_lock(&init_lock);
-    // first time return false
+    // malloc_init_hard_needed: first time return true
 	if (!malloc_init_hard_needed()) {
 		malloc_mutex_unlock(&init_lock);
 		return (false);
@@ -1378,7 +1379,7 @@ imalloc_body(size_t size, tsd_t **tsd, size_t *usize)
 
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
 void JEMALLOC_NOTHROW *
-JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE(1)
+//JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE(1)
 je_malloc(size_t size)
 {
 	void *ret;
@@ -1446,7 +1447,7 @@ imemalign_prof(tsd_t *tsd, size_t alignment, size_t usize)
 	return (p);
 }
 
-JEMALLOC_ATTR(nonnull(1))
+//JEMALLOC_ATTR(nonnull(1))
 static int
 imemalign(void **memptr, size_t alignment, size_t size, size_t min_alignment)
 {
@@ -1513,7 +1514,7 @@ label_oom:
 }
 
 JEMALLOC_EXPORT int JEMALLOC_NOTHROW
-JEMALLOC_ATTR(nonnull(1))
+//JEMALLOC_ATTR(nonnull(1))
 je_posix_memalign(void **memptr, size_t alignment, size_t size)
 {
 	int ret = imemalign(memptr, alignment, size, sizeof(void *));
@@ -1524,7 +1525,7 @@ je_posix_memalign(void **memptr, size_t alignment, size_t size)
 
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
 void JEMALLOC_NOTHROW *
-JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE(2)
+//JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE(2)
 je_aligned_alloc(size_t alignment, size_t size)
 {
 	void *ret;
@@ -1579,7 +1580,7 @@ icalloc_prof(tsd_t *tsd, size_t usize)
 
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
 void JEMALLOC_NOTHROW *
-JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE2(1, 2)
+//JEMALLOC_ATTR(malloc) JEMALLOC_ALLOC_SIZE2(1, 2)
 je_calloc(size_t num, size_t size)
 {
 	void *ret;
@@ -1628,7 +1629,7 @@ je_calloc(size_t num, size_t size)
 	}
 
 label_return:
-	if (unlikely(ret == NULL)) {
+	if (unlikely(ret == NULL)) { // ret != NULL
 		if (config_xmalloc && unlikely(opt_xmalloc)) {
 			malloc_write("<jemalloc>: Error in calloc(): out of "
 			    "memory\n");
@@ -1725,7 +1726,7 @@ isfree(tsd_t *tsd, void *ptr, size_t usize, tcache_t *tcache)
 
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
 void JEMALLOC_NOTHROW *
-JEMALLOC_ALLOC_SIZE(2)
+//JEMALLOC_ALLOC_SIZE(2)
 je_realloc(void *ptr, size_t size)
 {
 	void *ret;
@@ -1769,6 +1770,7 @@ je_realloc(void *ptr, size_t size)
 		ret = imalloc_body(size, &tsd, &usize);
 	}
 
+    //正常情况下 ret != NULL
 	if (unlikely(ret == NULL)) {
 		if (config_xmalloc && unlikely(opt_xmalloc)) {
 			malloc_write("<jemalloc>: Error in realloc(): "
@@ -1810,7 +1812,7 @@ je_free(void *ptr)
 #ifdef JEMALLOC_OVERRIDE_MEMALIGN
 JEMALLOC_EXPORT JEMALLOC_ALLOCATOR JEMALLOC_RESTRICT_RETURN
 void JEMALLOC_NOTHROW *
-JEMALLOC_ATTR(malloc)
+//JEMALLOC_ATTR(malloc)
 je_memalign(size_t alignment, size_t size)
 {
 	void *ret JEMALLOC_CC_SILENCE_INIT(NULL);

@@ -15,7 +15,9 @@ typedef struct rtree_s rtree_t;
  * machine address width.
  */
 #define	LG_RTREE_BITS_PER_LEVEL	4
+// 2^4 = 16
 #define	RTREE_BITS_PER_LEVEL	(ZU(1) << LG_RTREE_BITS_PER_LEVEL)
+// 2^6 / 2^4 = 2^2 = 4
 #define	RTREE_HEIGHT_MAX						\
     ((ZU(1) << (LG_SIZEOF_PTR+3)) / RTREE_BITS_PER_LEVEL)
 
@@ -79,6 +81,7 @@ struct rtree_level_s {
 };
 
 struct rtree_s {
+    // callback
 	rtree_node_alloc_t	*alloc;
 	rtree_node_dalloc_t	*dalloc;
 	unsigned		height;
@@ -86,7 +89,7 @@ struct rtree_s {
 	 * Precomputed table used to convert from the number of leading 0 key
 	 * bits to which subtree level to start at.
 	 */
-	unsigned		start_level[RTREE_HEIGHT_MAX];
+	unsigned		start_level[RTREE_HEIGHT_MAX]; //RTREE_HEIGHT_MAX = 2^6 / 2^4 = 2^2 = 4
 	rtree_level_t		levels[RTREE_HEIGHT_MAX];
 };
 

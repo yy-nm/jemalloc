@@ -16,10 +16,12 @@ rtree_new(rtree_t *rtree, unsigned bits, rtree_node_alloc_t *alloc,
 	unsigned bits_in_leaf, height, i;
 
 	assert(bits > 0 && bits <= (sizeof(uintptr_t) << 3));
-
+    // bits = 43
+    // bits_in_leaf = 11
 	bits_in_leaf = (bits % RTREE_BITS_PER_LEVEL) == 0 ? RTREE_BITS_PER_LEVEL
 	    : (bits % RTREE_BITS_PER_LEVEL);
 	if (bits > bits_in_leaf) {
+        // height = 3
 		height = 1 + (bits - bits_in_leaf) / RTREE_BITS_PER_LEVEL;
 		if ((height-1) * RTREE_BITS_PER_LEVEL + bits_in_leaf != bits)
 			height++;

@@ -3,7 +3,7 @@
 
 /******************************************************************************/
 /* Data. */
-
+// 3
 ssize_t		opt_lg_dirty_mult = LG_DIRTY_MULT_DEFAULT;
 static ssize_t	lg_dirty_mult_default;
 arena_bin_info_t	arena_bin_info[NBINS];
@@ -3262,6 +3262,12 @@ arena_boot(void)
 	 */
 	map_bias = 0;
 	for (i = 0; i < 3; i++) {
+        // offsetof(arena_chunk_t, map_bits) = sizeof(extent_node_t) = 8 + 8 + 8 + 3(5) + 8 + 16 + 16 + 16 + 16 = 104
+        // (sizeof(arena_chunk_map_bits_t) = 8
+        // sizeof(arena_chunk_map_misc_t) = 16 + 16 = 32
+        // i = 1
+        // head_size = 104 + (8 + 32) * 2^9
+        // map_bias = (104 + (8 + 32) * 2^9 + 2^12 - 1) >> 12 = 6
 		size_t header_size = offsetof(arena_chunk_t, map_bits) +
 		    ((sizeof(arena_chunk_map_bits_t) +
 		    sizeof(arena_chunk_map_misc_t)) * (chunk_npages-map_bias));

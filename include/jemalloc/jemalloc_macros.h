@@ -13,7 +13,7 @@
 
 #  define MALLOCX_LG_ALIGN(la)	(la)
 #  if LG_SIZEOF_PTR == 2
-#    define MALLOCX_ALIGN(a)	(ffs(a)-1)
+
 #  else
 #    define MALLOCX_ALIGN(a)						\
 	 ((a < (size_t)INT_MAX) ? ffs(a)-1 : ffs(a>>32)+31)
@@ -31,7 +31,7 @@
 #  define MALLOCX_ARENA(a)	((int)(((a)+1) << 20))
 
 #if defined(__cplusplus) && defined(JEMALLOC_USE_CXX_THROW)
-#  define JEMALLOC_CXX_THROW throw()
+
 #else
 #  define JEMALLOC_CXX_THROW
 #endif
@@ -43,18 +43,17 @@
 #    define JEMALLOC_ALLOC_SIZE(s) JEMALLOC_ATTR(alloc_size(s))
 #    define JEMALLOC_ALLOC_SIZE2(s1, s2) JEMALLOC_ATTR(alloc_size(s1, s2))
 #  else
-#    define JEMALLOC_ALLOC_SIZE(s)
-#    define JEMALLOC_ALLOC_SIZE2(s1, s2)
+
 #  endif
 #  ifndef JEMALLOC_EXPORT
-#    define JEMALLOC_EXPORT JEMALLOC_ATTR(visibility("default"))
+
 #  endif
 #  ifdef JEMALLOC_HAVE_ATTR_FORMAT_GNU_PRINTF
 #    define JEMALLOC_FORMAT_PRINTF(s, i) JEMALLOC_ATTR(format(gnu_printf, s, i))
 #  elif defined(JEMALLOC_HAVE_ATTR_FORMAT_PRINTF)
-#    define JEMALLOC_FORMAT_PRINTF(s, i) JEMALLOC_ATTR(format(printf, s, i))
+
 #  else
-#    define JEMALLOC_FORMAT_PRINTF(s, i)
+
 #  endif
 #  define JEMALLOC_NOINLINE JEMALLOC_ATTR(noinline)
 #  define JEMALLOC_NOTHROW JEMALLOC_ATTR(nothrow)
@@ -62,41 +61,7 @@
 #  define JEMALLOC_RESTRICT_RETURN
 #  define JEMALLOC_ALLOCATOR
 #elif _MSC_VER
-#  define JEMALLOC_ATTR(s)
-#  define JEMALLOC_ALIGNED(s) __declspec(align(s))
-#  define JEMALLOC_ALLOC_SIZE(s)
-#  define JEMALLOC_ALLOC_SIZE2(s1, s2)
-#  ifndef JEMALLOC_EXPORT
-#    ifdef DLLEXPORT
-#      define JEMALLOC_EXPORT __declspec(dllexport)
-#    else
-#      define JEMALLOC_EXPORT __declspec(dllimport)
-#    endif
-#  endif
-#  define JEMALLOC_FORMAT_PRINTF(s, i)
-#  define JEMALLOC_NOINLINE __declspec(noinline)
-#  ifdef __cplusplus
-#    define JEMALLOC_NOTHROW __declspec(nothrow)
-#  else
-#    define JEMALLOC_NOTHROW
-#  endif
-#  define JEMALLOC_SECTION(s) __declspec(allocate(s))
-#  define JEMALLOC_RESTRICT_RETURN __declspec(restrict)
-#  if _MSC_VER >= 1900 && !defined(__EDG__)
-#    define JEMALLOC_ALLOCATOR __declspec(allocator)
-#  else
-#    define JEMALLOC_ALLOCATOR
-#  endif
+
 #else
-#  define JEMALLOC_ATTR(s)
-#  define JEMALLOC_ALIGNED(s)
-#  define JEMALLOC_ALLOC_SIZE(s)
-#  define JEMALLOC_ALLOC_SIZE2(s1, s2)
-#  define JEMALLOC_EXPORT
-#  define JEMALLOC_FORMAT_PRINTF(s, i)
-#  define JEMALLOC_NOINLINE
-#  define JEMALLOC_NOTHROW
-#  define JEMALLOC_SECTION(s)
-#  define JEMALLOC_RESTRICT_RETURN
-#  define JEMALLOC_ALLOCATOR
+
 #endif

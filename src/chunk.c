@@ -708,13 +708,15 @@ chunk_boot(void)
 #endif
 
 	/* Set variables according to the value of opt_lg_chunk. */
-	chunksize = (ZU(1) << opt_lg_chunk);
+	chunksize = (ZU(1) << opt_lg_chunk);// chunksize= 2^21
 	assert(chunksize >= PAGE);
-	chunksize_mask = chunksize - 1;
-	chunk_npages = (chunksize >> LG_PAGE);
+	chunksize_mask = chunksize - 1; // 2^21 - 1
+	chunk_npages = (chunksize >> LG_PAGE); // 2^9, chunk page
 
 	if (have_dss && chunk_dss_boot())
 		return (true);
+    // rtee_new(&chunks_rtree, 2^6 -21, chunks_rtree_node_alloc, NULL)
+    // 64 - 21 = 43
 	if (rtree_new(&chunks_rtree, (ZU(1) << (LG_SIZEOF_PTR+3)) -
 	    opt_lg_chunk, chunks_rtree_node_alloc, NULL))
 		return (true);
