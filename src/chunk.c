@@ -14,8 +14,10 @@ static size_t	highchunks;
 rtree_t		chunks_rtree;
 
 /* Various chunk-related settings. */
+// 2^21
 size_t		chunksize;
 size_t		chunksize_mask; /* (chunksize - 1). */
+// 2^9
 size_t		chunk_npages;
 
 static void	*chunk_alloc_default(void *new_addr, size_t size,
@@ -385,7 +387,7 @@ chunk_alloc_base(size_t size)
 		return (NULL);
 	if (config_valgrind)
 		JEMALLOC_VALGRIND_MAKE_MEM_UNDEFINED(ret, size);
-
+    // 获得 2M, 且内存地址与 2M 对齐的内存块之后返回
 	return (ret);
 }
 

@@ -6,15 +6,23 @@
 // 3
 ssize_t		opt_lg_dirty_mult = LG_DIRTY_MULT_DEFAULT;
 static ssize_t	lg_dirty_mult_default;
+// NBINS = 36
 arena_bin_info_t	arena_bin_info[NBINS];
 
+// map_bias = 5
 size_t		map_bias;
+// map_misc_offset = 2^12 + 2^6
 size_t		map_misc_offset;
+// arena_maxrun = 2^21 - 2^12 - 2^14
 size_t		arena_maxrun; /* Max run size for arenas. */
+// arena_maxclass = 2^21 - 2^18
 size_t		arena_maxclass; /* Max size class for arenas. */
+// small_maxrun = arena_maxrun = 2^21 - 2^12 - 2^14
 static size_t	small_maxrun; /* Max run size used for small size classes. */
 static bool	*small_run_tab; /* Valid small run page multiples. */
+// 39, 从 4k 到 2M, [4k, 2M]
 unsigned	nlclasses; /* Number of large size classes. */
+// 161, [2m, ..)
 unsigned	nhclasses; /* Number of huge size classes. */
 
 /******************************************************************************/
@@ -89,7 +97,7 @@ arena_run_comp(arena_chunk_map_misc_t *a, arena_chunk_map_misc_t *b)
 
 /* Generate red-black tree functions. */
 rb_gen(static UNUSED, arena_run_tree_, arena_run_tree_t, arena_chunk_map_misc_t,
-    rb_link, arena_run_comp)
+    rb_link, arena_run_comp);
 
 static size_t
 run_quantize(size_t size)
@@ -3014,6 +3022,17 @@ arena_new(unsigned ind)
 	 * because there is no way to clean up if base_alloc() OOMs.
 	 */
 	if (config_stats) {
+        // CACHELINE_CEILING 返回 64倍数
+        // QUANTUM_CEILING 返回 16 倍数
+        // sizeof(arena_t) = 6800
+        // CACHELINE_CEILING(sizeof(arena_t)) = 107 * 64 = 6848
+        // sizeof(malloc_large_stats_t) = 32
+        /*
+        QUANTUM_CEILING(nlclasses * sizeof(malloc_large_stats_t) +
+		    nhclasses) = QUANTUM_CEILING(39 * 32 + 161) = 1424
+        */
+        // sizeof(malloc_huge_stats_t) = 24
+        // base_alloc(6848 + 1424 * 24) = 41024
 		arena = (arena_t *)base_alloc(CACHELINE_CEILING(sizeof(arena_t))
 		    + QUANTUM_CEILING(nlclasses * sizeof(malloc_large_stats_t) +
 		    nhclasses) * sizeof(malloc_huge_stats_t));
@@ -3053,6 +3072,7 @@ arena_new(unsigned ind)
 		 * cost of test repeatability.  For debug builds, instead use a
 		 * deterministic seed.
 		 */
+		 // arena->offset_state = (uint64_t)(uintptr_t)arena;
 		arena->offset_state = config_debug ? ind :
 		    (uint64_t)(uintptr_t)arena;
 	}
@@ -3123,6 +3143,7 @@ bin_info_run_size_calc(arena_bin_info_t *bin_info)
 	 * minimum alignment; without the padding, each redzone would have to
 	 * be twice as large in order to maintain alignment.
 	 */
+	 // opt_redzone = false
 	if (config_fill && unlikely(opt_redzone)) {
 		size_t align_min = ZU(1) << (jemalloc_ffs(bin_info->reg_size) -
 		    1);
@@ -3137,6 +3158,7 @@ bin_info_run_size_calc(arena_bin_info_t *bin_info)
 		bin_info->redzone_size = 0;
 		pad_size = 0;
 	}
+    // bin_info->reg_interval = bin_info->reg_size
 	bin_info->reg_interval = bin_info->reg_size +
 	    (bin_info->redzone_size << 1);
 
@@ -3155,6 +3177,7 @@ bin_info_run_size_calc(arena_bin_info_t *bin_info)
 	} while (perfect_run_size != perfect_nregs * bin_info->reg_size);
 	assert(perfect_nregs <= RUN_MAXREGS);
 
+    // actual_run_size 必须要是 reg_size 的整数倍
 	actual_run_size = perfect_run_size;
 	actual_nregs = (actual_run_size - pad_size) / bin_info->reg_interval;
 
@@ -3184,11 +3207,14 @@ bin_info_run_size_calc(arena_bin_info_t *bin_info)
 	assert(actual_run_size == s2u(actual_run_size));
 
 	/* Copy final settings. */
+    // run_size 必须是 page 的整数倍且小于 2M
 	bin_info->run_size = actual_run_size;
 	bin_info->nregs = actual_nregs;
+    // 不存在 redzone, pad_size, reg0_offset = 0
 	bin_info->reg0_offset = actual_run_size - (actual_nregs *
 	    bin_info->reg_interval) - pad_size + bin_info->redzone_size;
 
+    // small_maxrun = arena_maxrun = 2^21 - 2^12 - 2^14
 	if (actual_run_size > small_maxrun)
 		small_maxrun = actual_run_size;
 
@@ -3220,7 +3246,7 @@ small_run_size_init(void)
 {
 
 	assert(small_maxrun != 0);
-
+    // small_run_tab.length = 2^9 - 1 - 4
 	small_run_tab = (bool *)base_alloc(sizeof(bool) * (small_maxrun >>
 	    LG_PAGE));
 	if (small_run_tab == NULL)
@@ -3266,8 +3292,13 @@ arena_boot(void)
         // (sizeof(arena_chunk_map_bits_t) = 8
         // sizeof(arena_chunk_map_misc_t) = 16 + 16 = 32
         // i = 1
-        // head_size = 104 + (8 + 32) * 2^9
+        // header_size = 104 + (8 + 32) * 2^9
         // map_bias = (104 + (8 + 32) * 2^9 + 2^12 - 1) >> 12 = 6
+        // i = 2
+        // header_size = 104 + (8 + 32) * (2^9 - 6)
+        // map_bias = (104 + (8 + 32) * (2^9 - 6) + 2^12 - 1) >> 12 = 5
+        // i = 3
+        // map_bias = 5
 		size_t header_size = offsetof(arena_chunk_t, map_bits) +
 		    ((sizeof(arena_chunk_map_bits_t) +
 		    sizeof(arena_chunk_map_misc_t)) * (chunk_npages-map_bias));
@@ -3275,11 +3306,17 @@ arena_boot(void)
 	}
 	assert(map_bias > 0);
 
+    // 104 + 8 * (2^9 - 5)
+    // map_misc_offset = 2^12 + 2^6
 	map_misc_offset = offsetof(arena_chunk_t, map_bits) +
 	    sizeof(arena_chunk_map_bits_t) * (chunk_npages-map_bias);
 
+    // 2^21 - 5 << 12
+    // arena_maxrun = 2^21 - 2^12 - 2^14
 	arena_maxrun = chunksize - (map_bias << LG_PAGE);
 	assert(arena_maxrun > 0);
+    // size2index(chunksize) = 64
+    // arena_maxclass = 2^21 - 2^18
 	arena_maxclass = index2size(size2index(chunksize)-1);
 	if (arena_maxclass > arena_maxrun) {
 		/*
@@ -3290,7 +3327,11 @@ arena_boot(void)
 		arena_maxclass = arena_maxrun;
 	}
 	assert(arena_maxclass > 0);
+    // size2index(arena_maxclass) = 63
+    // size2index(SMALL_MAXCLASS) = 24
+    // nlclasses = 39
 	nlclasses = size2index(arena_maxclass) - size2index(SMALL_MAXCLASS);
+    // nlclasses = 236 - 36 - 39 = 161
 	nhclasses = NSIZES - nlclasses - NBINS;
 
 	bin_info_init();

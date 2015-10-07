@@ -67,6 +67,7 @@ malloc_tsd_cleanup_register(bool (*f)(void))
 	ncleanups++;
 }
 
+// a_cleanup
 void
 tsd_cleanup(void *arg)
 {
@@ -119,7 +120,7 @@ malloc_tsd_boot0(void)
 void
 malloc_tsd_boot1(void)
 {
-
+    // É¶¶¼²»×ö
 	tsd_boot1();
 	*tsd_arenas_cache_bypassp_get(tsd_fetch()) = false;
 }

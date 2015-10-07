@@ -237,6 +237,7 @@ MALLOC_TSD
 #undef O
 };
 
+// a_initializer
 static const tsd_t tsd_initializer = TSD_INITIALIZER;
 
 malloc_tsd_types(, tsd_t)

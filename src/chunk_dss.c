@@ -11,6 +11,7 @@ const char	*dss_prec_names[] = {
 };
 
 /* Current dss precedence default, used when creating new arenas. */
+// DSS_PREC_DEFAULT = dss_prec_secondary
 static dss_prec_t	dss_prec_default = DSS_PREC_DEFAULT;
 
 /*

@@ -4,7 +4,9 @@
 #define	LARGE_MINCLASS		(ZU(1) << LG_LARGE_MINCLASS)
 
 /* Maximum number of regions in one run. */
+// 9
 #define	LG_RUN_MAXREGS		(LG_PAGE - LG_TINY_MIN)
+// 2^9
 #define	RUN_MAXREGS		(1U << LG_RUN_MAXREGS)
 
 /*
@@ -45,6 +47,7 @@ struct arena_run_s {
 	unsigned	nfree;
 
 	/* Per region allocated/deallocated bitmap. */
+    // BITMAP_GROUPS_MAX = 1
 	bitmap_t	bitmap[BITMAP_GROUPS_MAX];
 };
 
@@ -124,6 +127,7 @@ struct arena_chunk_map_bits_s {
 #define	CHUNK_MAP_BININD_INVALID CHUNK_MAP_BININD_MASK
 
 #define	CHUNK_MAP_RUNIND_SHIFT	(CHUNK_MAP_BININD_SHIFT + 8)
+// CHUNK_MAP_SIZE_SHIFT = 1
 #define	CHUNK_MAP_SIZE_SHIFT	(CHUNK_MAP_RUNIND_SHIFT - LG_PAGE)
 #define	CHUNK_MAP_SIZE_MASK						\
     (~(CHUNK_MAP_BININD_MASK | CHUNK_MAP_FLAGS_MASK | CHUNK_MAP_STATE_MASK))

@@ -2,20 +2,28 @@
 #ifdef JEMALLOC_H_TYPES
 
 /* Maximum bitmap bit count is 2^LG_BITMAP_MAXBITS. */
+// LG_BITMAP_MAXBITS = 9
 #define	LG_BITMAP_MAXBITS	LG_RUN_MAXREGS
+// 2^9
 #define	BITMAP_MAXBITS		(ZU(1) << LG_BITMAP_MAXBITS)
 
 typedef struct bitmap_level_s bitmap_level_t;
 typedef struct bitmap_info_s bitmap_info_t;
 typedef unsigned long bitmap_t;
+// LG_SIZEOF_BITMAP = LG_SIZEOF_LONG = 3
 #define	LG_SIZEOF_BITMAP	LG_SIZEOF_LONG
 
 /* Number of bits per group. */
+// LG_BITMAP_GROUP_NBITS = 6
 #define	LG_BITMAP_GROUP_NBITS		(LG_SIZEOF_BITMAP + 3)
+// BITMAP_GROUP_NBITS = 64
 #define	BITMAP_GROUP_NBITS		(ZU(1) << LG_BITMAP_GROUP_NBITS)
+// BITMAP_GROUP_NBITS_MASK = 63
 #define	BITMAP_GROUP_NBITS_MASK		(BITMAP_GROUP_NBITS-1)
 
 /* Number of groups required to store a given number of bits. */
+// 以 64 位为一组, 不足补 1
+// 相当于 nbits / 64 + !!(nbits % 64)
 #define	BITMAP_BITS2GROUPS(nbits)					\
     ((nbits + BITMAP_GROUP_NBITS_MASK) >> LG_BITMAP_GROUP_NBITS)
 
@@ -49,18 +57,19 @@ typedef unsigned long bitmap_t;
  * Maximum number of groups required to support LG_BITMAP_MAXBITS.
  */
 #if LG_BITMAP_MAXBITS <= LG_BITMAP_GROUP_NBITS
-#  define BITMAP_GROUPS_MAX	BITMAP_GROUPS_1_LEVEL(BITMAP_MAXBITS)
+
 #elif LG_BITMAP_MAXBITS <= LG_BITMAP_GROUP_NBITS * 2
 #  define BITMAP_GROUPS_MAX	BITMAP_GROUPS_2_LEVEL(BITMAP_MAXBITS)
 #elif LG_BITMAP_MAXBITS <= LG_BITMAP_GROUP_NBITS * 3
-#  define BITMAP_GROUPS_MAX	BITMAP_GROUPS_3_LEVEL(BITMAP_MAXBITS)
+
 #elif LG_BITMAP_MAXBITS <= LG_BITMAP_GROUP_NBITS * 4
-#  define BITMAP_GROUPS_MAX	BITMAP_GROUPS_4_LEVEL(BITMAP_MAXBITS)
+
 #else
 #  error "Unsupported bitmap size"
 #endif
 
 /* Maximum number of levels possible. */
+// 9 / 3 + !! 0 = 3
 #define	BITMAP_MAX_LEVELS						\
     (LG_BITMAP_MAXBITS / LG_SIZEOF_BITMAP)				\
     + !!(LG_BITMAP_MAXBITS % LG_SIZEOF_BITMAP)
@@ -85,6 +94,7 @@ struct bitmap_info_s {
 	 * Only the first (nlevels+1) elements are used, and levels are ordered
 	 * bottom to top (e.g. the bottom level is stored in levels[0]).
 	 */
+	 // BITMAP_MAX_LEVELS = 3
 	bitmap_level_t levels[BITMAP_MAX_LEVELS+1];
 };
 

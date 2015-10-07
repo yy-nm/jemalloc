@@ -1,0 +1,13 @@
+
+#define	rb_gen(a_attr, a_prefix, a_rbt_type, a_type, a_field, a_cmp)
+
+rb_gen(, extent_tree_szad_, extent_tree_t, extent_node_t, szad_link, extent_szad_comp)
+rb_gen(, extent_tree_ad_, extent_tree_t, extent_node_t, ad_link, extent_ad_comp)
+
+extent_tree_szad_new:
+	rb_new(extent_node_t, szad_link, rbtree)
+		rbt_node_new(extent_node_t, szad_link, rbtree, &(rbtree->rbt_nil))
+			rbtn_left_set
+			rbtn_right_set
+			rbtn_red_set: = extent_tree_t.rbt_nil & 1
+		rbtn_black_set: 去除 red 上添加的 1

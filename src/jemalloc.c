@@ -24,6 +24,8 @@ bool	opt_redzone = false;
 bool	opt_utrace = false;
 bool	opt_xmalloc = false;
 bool	opt_zero = false;
+// 根据 cpu 数量,  cpu == 1, opt_narenas = 1, cpu > 1, opt_narenas = cpu << 2
+// 现在设置 cpu = 2, opt_narenas = 8
 size_t	opt_narenas = 0;
 
 /* Initialized to true if the process is running inside Valgrind. */
@@ -42,8 +44,12 @@ static malloc_mutex_t	arenas_lock;
  * takes some action to create them and allocate from them.
  */
 static arena_t		**arenas;
+// 根据 cpu 数量,  cpu == 1, narenas_total = 1, cpu > 1, narenas_total = cpu << 2
+// 现在设置 cpu = 2, narenas_total = 8
 static unsigned		narenas_total;
 static arena_t		*a0; /* arenas[0]; read-only after initialization. */
+// 根据 cpu 数量,  cpu == 1, narenas_total = 1, cpu > 1, narenas_total = cpu << 2
+// 现在设置 cpu = 2, narenas_auto = 8
 static unsigned		narenas_auto; /* Read-only after initialization. */
 
 typedef enum {
@@ -256,7 +262,7 @@ a0ialloc(size_t size, bool zero, bool is_metadata)
 	if (unlikely(malloc_init_a0()))
 		return (NULL);
 
-	return (iallocztm(NULL, size, zero, false, is_metadata, a0get()));
+	return (iallocztm(NULL, size, zero, NULL, is_metadata, a0get()));
 }
 
 static void
@@ -468,6 +474,7 @@ arena_get_hard(tsd_t *tsd, unsigned ind, bool init_if_missing)
 		assert(ind < narenas_actual || !init_if_missing);
 		narenas_cache = (ind < narenas_actual) ? narenas_actual : ind+1;
 
+        // 进入这个 if 就成死循环了
 		if (tsd_nominal(tsd) && !*arenas_cache_bypassp) {
 			*arenas_cache_bypassp = true;
 			arenas_cache = (arena_t **)a0malloc(sizeof(arena_t *) *
@@ -570,7 +577,8 @@ arena_choose_hard(tsd_t *tsd)
 		}
 		arena_bind_locked(tsd, choose);
 		malloc_mutex_unlock(&arenas_lock);
-	} else {
+	}
+    else {
 		ret = a0get();
 		arena_bind(tsd, 0);
 	}
@@ -1243,20 +1251,26 @@ malloc_init_hard_finish(void)
 		else
 			opt_narenas = 1;
 	}
+    //假设是 ncpus = 2, 即双核
+    // opt_narenas = 8
+    // narenas_auto = 8
 	narenas_auto = opt_narenas;
 	/*
 	 * Make sure that the arenas array can be allocated.  In practice, this
 	 * limit is enough to allow the allocator to function, but the ctl
 	 * machinery will fail to allocate memory at far lower limits.
 	 */
+	 // 在双核, 为 false
 	if (narenas_auto > chunksize / sizeof(arena_t *)) {
 		narenas_auto = chunksize / sizeof(arena_t *);
 		malloc_printf("<jemalloc>: Reducing narenas to limit (%d)\n",
 		    narenas_auto);
 	}
+    // narenas_total = 8
 	narenas_total = narenas_auto;
 
 	/* Allocate and initialize arenas. */
+    // 8 * 8
 	arenas = (arena_t **)base_alloc(sizeof(arena_t *) * narenas_total);
 	if (arenas == NULL)
 		return (true);

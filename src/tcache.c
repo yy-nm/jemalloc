@@ -5,11 +5,12 @@
 /* Data. */
 
 bool	opt_tcache = true;
+// LG_TCACHE_MAXCLASS_DEFAULT = 15
 ssize_t	opt_lg_tcache_max = LG_TCACHE_MAXCLASS_DEFAULT;
 
 tcache_bin_info_t	*tcache_bin_info;
 static unsigned		stack_nelms; /* Total stack elms per tcache. */
-
+// 41
 size_t			nhbins;
 size_t			tcache_maxclass;
 
@@ -316,12 +317,14 @@ tcache_create(tsd_t *tsd, arena_t *arena)
 	size_t size, stack_offset;
 	unsigned i;
 
+    // offsetof(tcache_t, tbins) = 32
 	size = offsetof(tcache_t, tbins) + (sizeof(tcache_bin_t) * nhbins);
 	/* Naturally align the pointer stacks. */
 	size = PTR_CEILING(size);
 	stack_offset = size;
 	size += stack_nelms * sizeof(void *);
 	/* Avoid false cacheline sharing. */
+    // CACHELINE = 64
 	size = sa2u(size, CACHELINE);
 
 	tcache = ipallocztm(tsd, size, CACHELINE, true, false, true, a0get());
@@ -499,6 +502,7 @@ tcache_boot(void)
 	 * If necessary, clamp opt_lg_tcache_max, now that arena_maxclass is
 	 * known.
 	 */
+	 // tcache_maxclass = 2^15
 	if (opt_lg_tcache_max < 0 || (1U << opt_lg_tcache_max) < SMALL_MAXCLASS)
 		tcache_maxclass = SMALL_MAXCLASS;
 	else if ((1U << opt_lg_tcache_max) > arena_maxclass)
@@ -506,9 +510,12 @@ tcache_boot(void)
 	else
 		tcache_maxclass = (1U << opt_lg_tcache_max);
 
+    // size2index(tcache_maxclass) = 40
+    // nhbins = 41
 	nhbins = size2index(tcache_maxclass) + 1;
 
 	/* Initialize tcache_bin_info. */
+    // sizeof(tcache_bin_info_t) = 32
 	tcache_bin_info = (tcache_bin_info_t *)base_alloc(nhbins *
 	    sizeof(tcache_bin_info_t));
 	if (tcache_bin_info == NULL)
@@ -528,6 +535,7 @@ tcache_boot(void)
 		}
 		stack_nelms += tcache_bin_info[i].ncached_max;
 	}
+    // ????
 	for (; i < nhbins; i++) {
 		tcache_bin_info[i].ncached_max = TCACHE_NSLOTS_LARGE;
 		stack_nelms += tcache_bin_info[i].ncached_max;

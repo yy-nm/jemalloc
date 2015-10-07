@@ -48,7 +48,9 @@ base_chunk_alloc(size_t minsize)
 	assert(minsize != 0);
 	node = base_node_try_alloc();
 	/* Allocate enough space to also carve a node out if necessary. */
+    // nsize = 128 : 0
 	nsize = (node == NULL) ? CACHELINE_CEILING(sizeof(extent_node_t)) : 0;
+    // 2M 的倍数
 	csize = CHUNK_CEILING(minsize + nsize);
 	addr = chunk_alloc_base(csize);
 	if (addr == NULL) {
@@ -87,6 +89,7 @@ base_alloc(size_t size)
 	 * Round size up to nearest multiple of the cacheline size, so that
 	 * there is no chance of false cache line sharing.
 	 */
+	 // 变成 64 的倍数
 	csize = CACHELINE_CEILING(size);
 
 	usize = s2u(csize);

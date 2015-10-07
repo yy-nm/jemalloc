@@ -210,6 +210,7 @@ pow2_ceil(size_t x)
 
 #if (defined(__i386__) || defined(__amd64__) || defined(__x86_64__))
 JEMALLOC_INLINE size_t
+// lg_floor 搜索这个 size_t 中第一个 bit 为 1 的位置, 从0开始
 lg_floor(size_t x)
 {
 	size_t ret;

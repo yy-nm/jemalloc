@@ -220,60 +220,61 @@ typedef unsigned szind_t;
  */
 #ifndef LG_QUANTUM
 #  if (defined(__i386__) || defined(_M_IX86))
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __ia64__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __alpha__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __sparc64__
-#    define LG_QUANTUM		4
+
 #  endif
 #  if (defined(__amd64__) || defined(__x86_64__) || defined(_M_X64))
 #    define LG_QUANTUM		4
 #  endif
 #  ifdef __arm__
-#    define LG_QUANTUM		3
+
 #  endif
 #  ifdef __aarch64__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __hppa__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __mips__
-#    define LG_QUANTUM		3
+
 #  endif
 #  ifdef __or1k__
-#    define LG_QUANTUM		3
+
 #  endif
 #  ifdef __powerpc__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __s390__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __SH4__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __tile__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifdef __le32__
-#    define LG_QUANTUM		4
+
 #  endif
 #  ifndef LG_QUANTUM
 #    error "Unknown minimum alignment for architecture; specify via "
 	 "--with-lg-quantum"
 #  endif
 #endif
-
+// LG_QUANTUM = 4
 #define	QUANTUM			((size_t)(1U << LG_QUANTUM))
 #define	QUANTUM_MASK		(QUANTUM - 1)
 
 /* Return the smallest quantum multiple that is >= a. */
+// 16 的最小整数倍
 #define	QUANTUM_CEILING(a)						\
 	(((a) + QUANTUM_MASK) & ~QUANTUM_MASK)
 
@@ -288,6 +289,7 @@ typedef unsigned szind_t;
 #define	PTR_MASK		(SIZEOF_PTR - 1)
 
 /* Return the smallest (void *) multiple that is >= a. */
+// 返回 8 的整数倍
 #define	PTR_CEILING(a)							\
 	(((a) + PTR_MASK) & ~PTR_MASK)
 
@@ -303,6 +305,7 @@ typedef unsigned szind_t;
 #define	CACHELINE_MASK		(CACHELINE - 1)
 
 /* Return the smallest cacheline multiple that is >= s. */
+// 64 的整数倍
 #define	CACHELINE_CEILING(s)						\
 	(((s) + CACHELINE_MASK) & ~CACHELINE_MASK)
 
@@ -538,6 +541,8 @@ size2index_compute(size_t size)
 		size_t x = unlikely(ZI(size) < 0) ? ((size<<1) ?
 		    (ZU(1)<<(LG_SIZEOF_PTR+3)) : ((ZU(1)<<(LG_SIZEOF_PTR+3))-1))
 		    : lg_floor((size<<1)-1);
+        // LG_QUANTUM = 4
+        // LG_SIZE_CLASS_GROUP = 2
 		size_t shift = (x < LG_SIZE_CLASS_GROUP + LG_QUANTUM) ? 0 :
 		    x - (LG_SIZE_CLASS_GROUP + LG_QUANTUM);
 		size_t grp = shift << LG_SIZE_CLASS_GROUP;
@@ -572,7 +577,7 @@ size2index(size_t size)
 {
 
 	assert(size > 0);
-	if (likely(size <= LOOKUP_MAXCLASS))
+	if (likely(size <= LOOKUP_MAXCLASS)) // 2k
 		return (size2index_lookup(size));
 	return (size2index_compute(size));
 }
@@ -633,6 +638,7 @@ s2u_compute(size_t size)
 	}
 #endif
 	{
+	    // 找到第一处 01 返回其 index, lg_floor 作用
 		size_t x = unlikely(ZI(size) < 0) ? ((size<<1) ?
 		    (ZU(1)<<(LG_SIZEOF_PTR+3)) : ((ZU(1)<<(LG_SIZEOF_PTR+3))-1))
 		    : lg_floor((size<<1)-1);
