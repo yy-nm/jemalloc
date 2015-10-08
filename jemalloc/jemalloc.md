@@ -261,6 +261,15 @@
 																		+ chunk_alloc_wrapper(arena, chunk_hooks, NULL, chunksize, chunksize, zero, commit);
 																			* chunk_hooks->alloc(new_addr, size, alignment, zero, commit, arena->ind);
 																			* 本质上调用的是 chunk_alloc_default 函数
+																				- chunk_arena_get(1)
+																					+ arena_get(tsd_fetch(), 1, false, true);
+																						* arena_get_hard
+																							- a0malloc
+																								+ a0ialloc(size, false, true)
+																									* iallocztm(NULL, size, zero, NULL, is_metadata, a0get())
+																										- arena_malloc
+																											+ arena_malloc_small
+																												* arena_bin_malloc_hard
 								- iaalloc
 								- isalloc
 								- arena_metadata_allocated_add
